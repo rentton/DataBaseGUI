@@ -1,7 +1,7 @@
 #Note: Done before understand decorators
 
 from tkinter import *
-from data import *
+from Data import *
 import sys
 
 #Create the graphic interface
@@ -22,6 +22,7 @@ class GUI:
 
 		self.__entries = []
 		self.__buttons = []
+		self.__menu = []
 		
 		########### CREATE THE LABELS ###########
 		for lab,pos in zip(labels,range(len(labels))):
@@ -30,10 +31,13 @@ class GUI:
 
 
 		########### CREATE AND SAVE THE ENTRIES ###########
-		for ins in range(len(labels)-1):
+		for ins,l in zip(range(len(labels)-1),labels):
 			inp = Entry(self.__frame,bg="#396EB0",bd="6")
+			if l == "Password":
+				inp.config(show="*")
 			inp.grid(row=ins,column=1,padx=10, pady=10,columnspan=4)
 			self.__entries.append(inp)
+			
 
 		########### CREATE THE TEXT WITH SCROLL ###########
 		self.__text = Text(self.__frame,width=15,height=5,bg="#396EB0",bd="6")
@@ -52,7 +56,10 @@ class GUI:
 		edit = Menu(menu_bar,tearoff=0)
 		edit.add_command(label="Delete entries")
 
-		menu_bar.add_cascade(label="BD", menu=DB)
+		self.__menu.append(DB)
+		self.__menu.append(edit)
+
+		menu_bar.add_cascade(label="DB", menu=DB)
 		menu_bar.add_cascade(label="Edit", menu=edit)
 
 		########### CREATE AND SAVE THE BUTTONS ###########
@@ -75,6 +82,9 @@ class GUI:
 
 	def text(self):
 		return self.__text
+
+	def menu(self):
+		return self.__menu
 
 	def destroy(self):
 		self.__root.destroy()
