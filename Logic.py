@@ -19,6 +19,85 @@ class logic:
 		#DB 
 		self.__DB = None
 
+	def __valid_name(self,name):
+		max_lenght = 15
+
+		#Checking the lenght 
+		if len(name) > max_lenght:
+			return (False,len(name))
+
+		#Checking the letters r correct
+		for letter in name:
+			if not ('A' <= letter <= 'Z' or 'a' <= letter <= 'z'):
+				print(f"{letter} --")
+				return (False,letter)
+		return (True,'')
+
+	def __valid_password(self,password):
+		number = False
+		letter = False
+		capital = False
+		min_length = 5
+
+		#Checking the lenght
+		if len(password) < min_length:
+			return (False,len(password))
+
+		#Checking the letters r correct
+		for let in password:
+			if 'a' <= let <= 'z':
+				letter = True
+			elif 'A' <= let <= 'Z':
+				capital = True
+			elif '0' <= let <= '9':
+				number = True
+			else:
+				return (False,let)
+
+		if number and capital and letter:
+			return (True,'')
+		return (False,'Invalid rule')
+
+
+	def __valid(self,vals):
+		valid_name = self.__valid_name(vals["Name"])
+		valid_pass = self.__valid_password(vals["Password"])
+		error = ""
+		
+		#Checks the id: if doesn't exist is created automatically bc of 
+		# AUTOINCREMENT SQLite3 argument
+		if vals["ID"]:
+			#We try to convert ID into integer
+			try:
+				int(vals["ID"])
+			except:
+				error += "ID must be numeric\n"
+
+		#Checks the name
+		if not valid_name[0]:
+			#Too long
+			if isinstance(valid_name[1],int): 
+				error += "Maximum size for the name is 15 characters\n"
+			#Invalid charac
+			if isinstance(valid_name[1],str):
+				error += f"The character {valid_name[1]} is invalid for the name\n"
+
+		#Check the password
+		if not valid_pass[0]:
+			#Too short
+			if isinstance(valid_pass[1],int): 
+				error += f"Minimun size for the password is 5 characters\n"
+			#Incorrect password
+			if valid_pass[1] == "Invalid rule":
+				error += "The password should contain at least a capital letter a lower case letter and a number\n"
+			#Invalid character
+			if isinstance(valid_pass[1],str):
+				error += f"The password cannot contain the character {valid_pass[1]}\n"
+		
+		if error:
+			messagebox.showerror("Data Exception", error)
+			return False
+		return True
 
 	#Read the characters writed in the entries
 	def read(self):
@@ -28,19 +107,23 @@ class logic:
 				self.__inputs.append(None)
 			else:
 				self.__inputs.append(str_.get())
-			str_.set("")
 
 		#Text widget
 		#Note: 1.0 --> Read in one line // end-1c --> Read till end except last tab
-		text = self.__obj.text().get("1.0",
-			'end-1c')
+		text = self.__obj.text().get("1.0", 'end-1c')
 		if text == '':
 			self.__inputs[len(self.__inputs)-1] = None
 		else:
 			self.__inputs[len(self.__inputs)-1] = text
 
-		print(dict(zip(labels,self.__inputs)))
-		return dict(zip(labels,self.__inputs))
+		vals = dict(zip(labels,self.__inputs))
+		
+		#If the entries are valid
+		if self.__valid(vals):
+			self.__delete_entries()
+			return vals
+		#If not keep the entries to the user fix the error
+		return None
 
 	#Action when we push a buttom
 	def act(self,kind):
@@ -50,14 +133,15 @@ class logic:
 				"You have to create database first. Go DB/start")
 		else:	
 			data = self.read()
-			if kind == 'Insert':
-				self.__DB.insert(data)
-			elif kind == 'Consult':
-				self.__DB.consult(data)
-			elif kind == 'Update':
-				self.__DB.update(data)
-			elif kind == 'Delete':
-				self.__DB.delete(data)
+			if data:	
+				if kind == 'Insert':
+					self.__DB.insert(data)
+				elif kind == 'Consult':
+					self.__DB.consult(data)
+				elif kind == 'Update':
+					self.__DB.update(data)
+				elif kind == 'Delete':
+					self.__DB.delete(data)
 			self.__inputs.clear()
 
 

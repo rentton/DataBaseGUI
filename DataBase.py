@@ -13,8 +13,8 @@ class DataBase:
 		self.__pointer.execute(''' 
 			CREATE TABLE DB(
 			ID INTEGER PRIMARY KEY AUTOINCREMENT,
-			Name VARCHAR(10) NOT NULL,
-			Password VARCHAR(10) UNIQUE NOT NULL,
+			Name VARCHAR(15) NOT NULL,
+			Password VARCHAR(20) UNIQUE NOT NULL,
 			Dir VARCHAR(10),
 			More VARCHAR(50) )
 			''')
@@ -33,12 +33,9 @@ class DataBase:
 		return str
 
 	def insert(self,data):
-		if not data["ID"] or not data["Name"] or not data["Password"]:
-			messagebox.showerror("Insert","ID, Name and Password cannot be null")
-		else:
 			for i in data:
 				if not data[i]:
-					data[i] = "NULL"
+					data[i] = 'NULL'
 			self.__pointer.execute(f"INSERT INTO DB VALUES {str(tuple(data.values()))}")
 			self.__connex.commit()
 
@@ -66,10 +63,7 @@ class DataBase:
 	def update(self,data):
 		ID = data["ID"]
 		data["ID"] = None
-		if not ID:
-			messagebox.showerror("Update","Updates are done basing in ID field, so it cannot be null")
-		else:
-			self.__pointer.execute(f"UPDATE DB SET {self.__rewrite(data,',')} WHERE ID = {ID}")
+		self.__pointer.execute(f"UPDATE DB SET {self.__rewrite(data,',')} WHERE ID = {ID}")
 
 
 
